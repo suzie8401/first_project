@@ -25,12 +25,14 @@ qa_data = {
 def find_answer(user_input: str) -> str:
     text = user_input.strip().lower()
 
-    if "우선순위" in text and "정의" in text:
-        return qa_data["guide"]["priority_definition"]
-    if "심각도" in text and "정의" in text:
-        return qa_data["guide"]["severity_definition"]
-    if "차이" in text or ("우선순위" in text and "심각도" in text):
+    if "차이" in text and "우선순위" in text and "심각도" in text:
         return qa_data["guide"]["difference"]
+
+    if "우선순위" in text:
+        return qa_data["guide"]["priority_definition"]
+
+    if "심각도" in text:
+        return qa_data["guide"]["severity_definition"]
 
     if "highest" in text:
         return f"[Highest]\n{qa_data['priority']['Highest']}"
