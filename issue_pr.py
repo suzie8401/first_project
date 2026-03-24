@@ -24,61 +24,53 @@ qa_data = {
 
 def find_answer(user_input: str) -> str:
     text = user_input.strip().lower()
-    print("입력값:", text)
 
-    if "차이" in text and "우선순위" in text and "심각도" in text:
+    # 차이 설명
+    if "차이" in text:
         return qa_data["guide"]["difference"]
 
+    # 공통 정의
     if "우선순위" in text:
         return qa_data["guide"]["priority_definition"]
 
-    if "심각도" in text:
+    if "심각도" in text or "이슈등급" in text or "등급" in text:
         return qa_data["guide"]["severity_definition"]
 
-    if "highest" in text:
+    # priority
+    if "highest" in text or "하이스트" in text or "최상" in text or "최고" in text:
         return f"[Highest]\n{qa_data['priority']['Highest']}"
-    if "high" in text:
+
+    if "high" in text or "높음" in text:
         return f"[High]\n{qa_data['priority']['High']}"
-    if "medium" in text:
+
+    if "medium" in text or "중간" in text or "보통" in text:
         return f"[Medium]\n{qa_data['priority']['Medium']}"
-    if "low" in text:
+
+    if "low" in text or "낮음" in text:
         return f"[Low]\n{qa_data['priority']['Low']}"
 
-    if "critical" in text:
+    # severity
+    if "critical" in text or "크리티컬" in text or "치명" in text:
         return f"[Critical]\n{qa_data['severity']['Critical']}"
-    if "major" in text:
-        return f"[Major]\n{qa_data['severity']['Major']}"
-    if "minor" in text:
-        return f"[Minor]\n{qa_data['severity']['Minor']}"
-    if "trivial" in text:
-        return f"[Trivial]\n{qa_data['severity']['Trivial']}"
 
-    if "최상" in text or "최고" in text:
-        return f"[Highest]\n{qa_data['priority']['Highest']}"
-    if "높음" in text:
-        return f"[High]\n{qa_data['priority']['High']}"
-    if "보통" in text or "중간" in text:
-        return f"[Medium]\n{qa_data['priority']['Medium']}"
-    if "낮음" in text:
-        return f"[Low]\n{qa_data['priority']['Low']}"
-
-    if "치명" in text:
-        return f"[Critical]\n{qa_data['severity']['Critical']}"
-    if "주요" in text:
+    if "major" in text or "메이저" in text or "주요" in text:
         return f"[Major]\n{qa_data['severity']['Major']}"
-    if "경미" in text:
+
+    if "minor" in text or "마이너" in text or "경미" in text:
         return f"[Minor]\n{qa_data['severity']['Minor']}"
-    if "오탈자" in text or "사소" in text:
+
+    if "trivial" in text or "트리비얼" in text or "사소" in text or "오탈자" in text:
         return f"[Trivial]\n{qa_data['severity']['Trivial']}"
 
     return (
         "질문을 이해하지 못했어요.\n\n"
-        "예시 질문:\n"
-        "- 우선순위 정의\n"
-        "- 심각도 정의\n"
-        "- 우선순위와 심각도 차이\n"
-        "- Highest 뜻\n"
-        "- Critical 뜻"
+        "예시 입력:\n"
+        "- 우선순위\n"
+        "- 이슈등급\n"
+        "- High\n"
+        "- Critical\n"
+        "- 하이스트\n"
+        "- 크리티컬"
     )
 
 @app.route("/", methods=["GET"])
