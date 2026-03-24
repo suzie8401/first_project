@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# 챗봇 답변 데이터
 qa_data = {
     "guide": {
         "priority_definition": "우선순위는 이슈를 얼마나 빨리 처리해야 하는지를 나타냅니다.",
@@ -23,21 +22,16 @@ qa_data = {
     }
 }
 
-
 def find_answer(user_input: str) -> str:
     text = user_input.strip().lower()
 
-    # 공통 설명
     if "우선순위" in text and "정의" in text:
         return qa_data["guide"]["priority_definition"]
-
     if "심각도" in text and "정의" in text:
         return qa_data["guide"]["severity_definition"]
-
     if "차이" in text or ("우선순위" in text and "심각도" in text):
         return qa_data["guide"]["difference"]
 
-    # priority
     if "highest" in text:
         return f"[Highest]\n{qa_data['priority']['Highest']}"
     if "high" in text:
@@ -47,7 +41,6 @@ def find_answer(user_input: str) -> str:
     if "low" in text:
         return f"[Low]\n{qa_data['priority']['Low']}"
 
-    # severity
     if "critical" in text:
         return f"[Critical]\n{qa_data['severity']['Critical']}"
     if "major" in text:
@@ -57,7 +50,6 @@ def find_answer(user_input: str) -> str:
     if "trivial" in text:
         return f"[Trivial]\n{qa_data['severity']['Trivial']}"
 
-    # 한글 키워드 대응
     if "최상" in text or "최고" in text:
         return f"[Highest]\n{qa_data['priority']['Highest']}"
     if "높음" in text:
@@ -86,18 +78,17 @@ def find_answer(user_input: str) -> str:
         "- Critical 뜻"
     )
 
+@app.route("/", methods=["GET"])
+def home():
+    return "QA 챗봇 서버 실행 중!"
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    body = request.get_json()
-
-    # 카카오 챗봇에서 보낸 사용자 발화문 추출
+    body = request.get_json(silent=True) or {}
     user_input = body.get("userRequest", {}).get("utterance", "")
-
     answer = find_answer(user_input)
 
-    # 카카오 챗봇 응답 형식
-    response = {
+    return jsonify({
         "version": "2.0",
         "template": {
             "outputs": [
@@ -108,15 +99,7 @@ def webhook():
                 }
             ]
         }
-    }
-
-    return jsonify(response)
-
-
-@app.route("/", methods=["GET"])
-def home():
-    return "QA 챗봇 서버 실행 중!"
-
+    })
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
