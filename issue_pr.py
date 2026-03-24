@@ -24,6 +24,7 @@ qa_data = {
 
 def find_answer(user_input: str) -> str:
     text = user_input.strip().lower()
+    print("입력값:", text)
 
     if "차이" in text and "우선순위" in text and "심각도" in text:
         return qa_data["guide"]["difference"]
