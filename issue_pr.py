@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
-import pandas as pd
+import csv
+import io
+from urllib.request import urlopen
 
 app = Flask(__name__)
 
@@ -7,23 +9,21 @@ SHEET_URL = "https://docs.google.com/spreadsheets/d/1OQG4QlSQLRdElB0VdXO7gmI0dMG
 
 
 def load_sheet_data():
-    df = pd.read_csv(SHEET_URL)
-    df = df.fillna("")
-    return df
+    with urlopen(SHEET_URL) as response:
+        content = response.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(content))
+    return list(reader)
 
 
 def find_answer(user_input: str) -> str:
     text = user_input.strip().lower()
-    df = load_sheet_data()
+    rows = load_sheet_data()
 
-    # 더 긴 키워드를 먼저 검사해서
-    # "high"보다 "highest"가 먼저 매칭되게 함
-    df["keyword_len"] = df["keyword"].astype(str).apply(len)
-    df = df.sort_values(by="keyword_len", ascending=False)
+    rows.sort(key=lambda r: len(str(r.get("keyword", ""))), reverse=True)
 
-    for _, row in df.iterrows():
-        keyword = str(row["keyword"]).strip().lower()
-        answer = str(row["answer"]).strip()
+    for row in rows:
+        keyword = str(row.get("keyword", "")).strip().lower()
+        answer = str(row.get("answer", "")).strip()
 
         if keyword and keyword in text:
             return answer.replace("\\n", "\n")
@@ -86,4 +86,3 @@ def webhook():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
