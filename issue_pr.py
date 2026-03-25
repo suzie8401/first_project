@@ -31,6 +31,13 @@ bot_data = {
 def find_answer(user_input: str) -> str:
     text = user_input.strip().lower()
 
+    if "이슈 등록 정의" in text:
+        return ("이슈 등록 시 심각도와 우선순위를 참고하시려면 예시 키워드를 입력해주세요\n\n"
+        "예시:\n"
+        "- Critical (치명)\n"
+        "- Major (주요)\n"
+        "- High (우선순위 높음)")
+    
     if "차이" in text and "우선순위" in text and "심각도" in text:
         return bot_data["guide"]["difference"]
 
