@@ -6,7 +6,7 @@ from difflib import SequenceMatcher
 
 app = Flask(__name__)
 
-SHEET_URL = "https://docs.google.com/spreadsheets/d/1OQG4QlSQLRdElB0VdXO7gmI0dMGtXddChglK_pJCJh8/export?format=csv&gid=0"
+SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQXNJX95FQ9nuyvwKmUJy9fGHnmrRDLkOBV7X4a6d3uAkHlYKuFo6k2RF3Xv4KBg6b2jWOJcamau9D8/pub?gid=0&single=true&output=csv"
 
 
 def load_sheet_data():
@@ -17,7 +17,10 @@ def load_sheet_data():
 
 
 def normalize_text(text: str) -> str:
-    return text.strip().lower().replace(" ", "")
+    if text is None:
+        return ""
+    # 양끝 공백 제거, 소문자화, 모든 공백 제거
+    return str(text).strip().lower().replace(" ", "").replace("\xa0", "")
 
 
 def similarity(a: str, b: str) -> float:
