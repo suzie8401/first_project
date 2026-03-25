@@ -116,7 +116,20 @@ def webhook():
             ]
         }
     })
-
+    except Exception as e:
+        print("에러:", e)
+        return jsonify({
+            "version": "2.0",
+            "template": {
+                "outputs": [
+                    {
+                        "simpleText": {
+                            "text": "서버 처리 중 오류가 발생했습니다."
+                        }
+                    }
+                ]
+            }
+        })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
