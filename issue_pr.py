@@ -31,18 +31,15 @@ bot_data = {
 def find_answer(user_input: str) -> str:
     text = user_input.strip().lower()
 
-    # 차이 설명
     if "차이" in text and "우선순위" in text and "심각도" in text:
         return bot_data["guide"]["difference"]
 
-    # 공통 정의
     if "우선순위" in text:
         return bot_data["guide"]["priority_definition"]
 
     if "심각도" in text or "이슈등급" in text or "등급" in text:
         return bot_data["guide"]["severity_definition"]
 
-    # QA / QC / 품질
     if "qa" in text or "큐에이" in text or "품질보증" in text or "품질 보증" in text:
         return bot_data["qa_terms"]["QA"]
 
@@ -52,7 +49,6 @@ def find_answer(user_input: str) -> str:
     if "품질" in text:
         return bot_data["qa_terms"]["Quality"]
 
-    # Priority 상세
     if "highest" in text or "하이스트" in text or "최상" in text or "최고" in text:
         return f"[Highest]\n{bot_data['priority']['Highest']}"
 
@@ -65,7 +61,6 @@ def find_answer(user_input: str) -> str:
     if "low" in text or "로우" in text or "낮음" in text:
         return f"[Low]\n{bot_data['priority']['Low']}"
 
-    # Severity 상세
     if "critical" in text or "크리티컬" in text or "치명" in text:
         return f"[Critical]\n{bot_data['severity']['Critical']}"
 
@@ -100,22 +95,23 @@ def home():
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    body = request.get_json(silent=True) or {}
-    user_input = body.get("userRequest", {}).get("utterance", "")
-    answer = find_answer(user_input)
+    try:
+        body = request.get_json(silent=True) or {}
+        user_input = body.get("userRequest", {}).get("utterance", "")
+        answer = find_answer(user_input)
 
-    return jsonify({
-        "version": "2.0",
-        "template": {
-            "outputs": [
-                {
-                    "simpleText": {
-                        "text": answer
+        return jsonify({
+            "version": "2.0",
+            "template": {
+                "outputs": [
+                    {
+                        "simpleText": {
+                            "text": answer
+                        }
                     }
-                }
-            ]
-        }
-    })
+                ]
+            }
+        })
     except Exception as e:
         print("에러:", e)
         return jsonify({
@@ -130,6 +126,7 @@ def webhook():
                 ]
             }
         })
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
