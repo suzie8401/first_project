@@ -1,3 +1,4 @@
+import time
 from flask import Flask, request, jsonify
 import csv
 import io
@@ -8,6 +9,10 @@ from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 
 app = Flask(__name__)
+
+CACHE_DATA = []
+CACHE_TIME = 0
+CACHE_TTL = 300  # 5분
 
 SPREADSHEET_ID = "1OQG4QlSQLRdElB0VdXO7gmI0dMGtXddChglK_pJCJh8"
 GID = "0"
@@ -77,6 +82,17 @@ def build_bot_data():
 
     return bot_data
 
+def get_bot_data():
+    global CACHE_DATA, CACHE_TIME
+    now = time.time()
+
+    if CACHE_DATA and (now - CACHE_TIME < CACHE_TTL):
+        return CACHE_DATA
+
+    CACHE_DATA = build_bot_data()
+    CACHE_TIME = now
+    return CACHE_DATA
+
 def find_answer(user_input: str) -> str:
     text = normalize_text(user_input)
 
@@ -84,7 +100,7 @@ def find_answer(user_input: str) -> str:
         return "질문을 입력해주세요."
 
     try:
-        bot_data = build_bot_data()
+        bot_data = get_bot_data()
     except Exception as e:
         print(f"[시트 로딩 오류] {e}")
         return "구글시트 데이터를 불러오지 못했어요. 시트 공개 여부와 URL을 확인해주세요."
@@ -153,12 +169,13 @@ def webhook():
 def test_sheet():
     try:
         rows = load_sheet_rows()
-        bot_data = build_bot_data()
+        bot_data = get_bot_data()
         return jsonify({
             "row_count": len(rows),
             "grouped_count": len(bot_data),
             "raw_rows_preview": rows[:5],
-            "grouped_preview": bot_data[:5]
+            "grouped_preview": bot_data[:5],
+            "cache_age_seconds": int(time.time() - CACHE_TIME) if CACHE_TIME else None
         })
     except Exception as e:
         return jsonify({
