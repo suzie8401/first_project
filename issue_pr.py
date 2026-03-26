@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import csv
 import io
 import os
+import re
 from collections import OrderedDict
 from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
@@ -20,12 +21,10 @@ FALLBACK_MESSAGE = (
     "• QA, QC, 품질, 페이징, 뒤로가기"
 )
 
-import re
-
 def normalize_text(text: str) -> str:
     text = str(text)
-    text = re.sub(r"\s+", "", text)   # 모든 공백/줄바꿈 제거
-    text = text.replace("\u200b", "") # 제로폭 공백 제거
+    text = re.sub(r"\s+", "", text)
+    text = text.replace("\u200b", "")
     return text.lower()
 
 def load_sheet_rows():
@@ -113,8 +112,22 @@ def home():
 def webhook():
     try:
         body = request.get_json(silent=True) or {}
+        print("[REQUEST BODY]", body)
+
         user_input = body.get("userRequest", {}).get("utterance", "")
+
+        if not user_input:
+            user_input = body.get("action", {}).get("params", {}).get("keyword", "")
+
+        if not user_input:
+            params = body.get("action", {}).get("params", {})
+            if params:
+                user_input = list(params.values())[0]
+
+        print("[USER INPUT]", user_input)
+
         answer = find_answer(user_input)
+        print("[BOT ANSWER]", answer)
 
         return jsonify({
             "version": "2.0",
@@ -124,6 +137,7 @@ def webhook():
                 ]
             }
         })
+
     except Exception as e:
         print(f"[웹훅 오류] {e}")
         return jsonify({
