@@ -20,8 +20,13 @@ FALLBACK_MESSAGE = (
     "• QA, QC, 품질, 페이징, 뒤로가기"
 )
 
+import re
+
 def normalize_text(text: str) -> str:
-    return str(text).replace(" ", "").replace("\n", "").replace("\r", "").strip().lower()
+    text = str(text)
+    text = re.sub(r"\s+", "", text)   # 모든 공백/줄바꿈 제거
+    text = text.replace("\u200b", "") # 제로폭 공백 제거
+    return text.lower()
 
 def load_sheet_rows():
     try:
